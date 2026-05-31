@@ -1,85 +1,127 @@
-# Chess Master - Project Plan
+# KnightFall - Chess Game Specification
 
-## Overview
+## Project Overview
 
-Build a single-player chess web application using Angular and deploy it on Netlify.
+KnightFall is a single-player chess application built with Angular.
 
-The application will:
+Players can play against an AI opponent with five difficulty levels, track their performance, and review previous games.
 
-* Allow users to play chess against an AI opponent.
-* Provide 5 difficulty levels.
-* Track player statistics without requiring login.
-* Store player data using a unique browser-generated identifier.
-* Save game history and statistics in a database.
-* Run the chess engine directly in the browser for fast gameplay.
+The application will be fully hosted on Netlify and will not require:
+
+* User accounts
+* Login or registration
+* Backend services
+* Databases
+
+All player data will be stored locally in the browser.
 
 ---
 
-# Tech Stack
+# Objectives
+
+## Primary Goals
+
+* Play chess against an AI opponent
+* Support 5 difficulty levels
+* Track player statistics
+* Save game history
+* Deploy entirely on Netlify
+* Work on desktop and mobile devices
+
+## Non-Goals (Version 1)
+
+* Multiplayer gameplay
+* User authentication
+* Cloud synchronization
+* Online leaderboards
+* Social features
+
+---
+
+# Technology Stack
 
 ## Frontend
 
 * Angular (Latest Stable Version)
 * TypeScript
-* Angular Material (Optional)
-* ngx-chess-board (or custom chess board)
+* Angular Standalone Components
+* Angular Router
 
-## Chess Logic
+## Chess Libraries
+
+### Game Rules
 
 * chess.js
+
+Responsibilities:
+
+* Legal move validation
+* Check detection
+* Checkmate detection
+* Stalemate detection
+* PGN generation
+* FEN generation
+
+### AI Engine
+
 * Stockfish.js
 
-## Storage
+Responsibilities:
 
-### Browser Storage
+* AI move calculation
+* Difficulty management
 
-Store:
+### Chess Board UI
 
-* playerId (UUID)
-* UI preferences
-* Last played game state (optional)
+Options:
 
-### Database
+* ngx-chess-board
+* Custom board implementation
 
 Recommended:
 
-* Turso (SQLite-compatible cloud database)
-
-Alternative:
-
-* Supabase
-* Neon
+* Start with ngx-chess-board
+* Move to custom board later if needed
 
 ---
 
-# Hosting
+# Application Architecture
 
-Frontend:
+```text
+Angular Application
+│
+├── Chess Board UI
+├── chess.js
+├── Stockfish.js
+├── Local Storage
+│
+└── Netlify Hosting
+```
 
-* Netlify
+No backend required.
 
-Repository:
+No database required.
 
-* GitHub
+No API required.
 
 ---
 
-# User Identification
+# Player Identification
 
-No login system.
+The application identifies players using a browser-generated UUID.
 
-On first visit:
-
-1. Generate UUID
-2. Store UUID in localStorage
-3. Create player record in database
-
-Example:
+Generated on first visit:
 
 ```typescript
 const playerId = crypto.randomUUID();
-localStorage.setItem('playerId', playerId);
+
+localStorage.setItem(
+  'playerId',
+  playerId
+);
 ```
+
+This identifier remains available until browser storage is cleared.
 
 ---
 
@@ -95,203 +137,397 @@ localStorage.setItem('playerId', playerId);
 
 ---
 
-# Features - Version 1
+# Features
 
-## Home Page
+## Home Screen
 
-* Start Game
-* Difficulty Selection
-* Statistics Overview
+### Display
 
-## Game Page
+* Application title
+* Start New Game
+* Statistics
+* Game History
 
-* Chess Board
-* Move History
-* New Game
-* Resign Game
-* Difficulty Indicator
+### Actions
 
-## Statistics Page
+* Select difficulty
+* Start game
+* View statistics
+* View previous games
 
-* Total Games Played
+---
+
+## Game Screen
+
+### Display
+
+* Chess board
+* Captured pieces
+* Move history
+* Current difficulty
+
+### Actions
+
+* Make move
+* Start new game
+* Resign game
+
+### Rules
+
+* Legal move validation
+* Check detection
+* Checkmate detection
+* Draw detection
+
+---
+
+## Statistics Screen
+
+Display:
+
+* Games played
 * Wins
 * Losses
 * Draws
-* Win Percentage
-* Highest Difficulty Beaten
+* Win percentage
+* Current win streak
+* Longest win streak
+* Highest difficulty beaten
 
 ---
 
-# Database Design
+## History Screen
 
-## Players
+Display:
 
-```sql
-CREATE TABLE players (
-    player_id TEXT PRIMARY KEY,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    games_played INTEGER DEFAULT 0,
-    wins INTEGER DEFAULT 0,
-    losses INTEGER DEFAULT 0,
-    draws INTEGER DEFAULT 0,
-    highest_level_beaten INTEGER DEFAULT 0
-);
-```
+* Previous games
+* Difficulty played
+* Result
+* Date played
 
-## Games
+Future Enhancement:
 
-```sql
-CREATE TABLE games (
-    game_id TEXT PRIMARY KEY,
-    player_id TEXT NOT NULL,
-    difficulty INTEGER NOT NULL,
-    result TEXT NOT NULL,
-    moves TEXT,
-    played_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
+* Replay game using PGN
 
 ---
 
-# Project Structure
+# Local Storage Design
+
+## Player Information
+
+Storage Key
 
 ```text
-src/
-|
-├── app/
-│
-├── pages/
-│   ├── home/
-│   ├── game/
-│   └── stats/
-│
-├── components/
-│   ├── chess-board/
-│   ├── move-history/
-│   └── difficulty-selector/
-│
-├── services/
-│   ├── chess.service.ts
-│   ├── stockfish.service.ts
-│   ├── player.service.ts
-│   └── stats.service.ts
-│
-├── models/
-│   ├── player.model.ts
-│   ├── game.model.ts
-│   └── stats.model.ts
-│
-└── shared/
+knightfall-player
+```
+
+Structure
+
+```json
+{
+  "playerId": "uuid",
+  "createdAt": "2026-05-31T10:00:00Z"
+}
 ```
 
 ---
 
-# Development Phases
+## Statistics
 
-## Phase 1 - Project Setup
+Storage Key
 
-### Tasks
+```text
+knightfall-stats
+```
+
+Structure
+
+```json
+{
+  "gamesPlayed": 0,
+  "wins": 0,
+  "losses": 0,
+  "draws": 0,
+  "currentStreak": 0,
+  "longestStreak": 0,
+  "highestDifficultyBeaten": 0
+}
+```
+
+---
+
+## Game History
+
+Storage Key
+
+```text
+knightfall-games
+```
+
+Structure
+
+```json
+[
+  {
+    "gameId": "uuid",
+    "difficulty": 3,
+    "result": "WIN",
+    "moveCount": 42,
+    "durationSeconds": 820,
+    "playedAt": "2026-05-31T10:15:00Z",
+    "pgn": "1.e4 e5 2.Nf3 ..."
+  }
+]
+```
+
+Store only the most recent 100 games.
+
+---
+
+# Angular Project Structure
+
+```text
+src/app
+│
+├── core
+│   ├── models
+│   └── services
+│
+├── features
+│   ├── home
+│   ├── game
+│   ├── stats
+│   └── history
+│
+├── shared
+│   └── components
+│
+└── layout
+```
+
+---
+
+# Services
+
+## ChessService
+
+Responsibilities:
+
+* Create game
+* Make move
+* Undo move
+* Check game state
+* Generate PGN
+
+Methods:
+
+```typescript
+newGame()
+
+makeMove()
+
+undoMove()
+
+getFen()
+
+getPgn()
+
+isGameOver()
+```
+
+---
+
+## StockfishService
+
+Responsibilities:
+
+* Initialize worker
+* Configure difficulty
+* Request best move
+
+Methods:
+
+```typescript
+initialize()
+
+setDifficulty()
+
+getBestMove()
+
+terminate()
+```
+
+---
+
+## StorageService
+
+Responsibilities:
+
+* Read localStorage
+* Write localStorage
+* Manage player data
+* Manage statistics
+* Manage game history
+
+Methods:
+
+```typescript
+getPlayer()
+
+savePlayer()
+
+getStats()
+
+saveStats()
+
+getGames()
+
+saveGame()
+```
+
+---
+
+# Data Flow
+
+```text
+Player Move
+      │
+      ▼
+Chess Board
+      │
+      ▼
+ChessService
+      │
+      ▼
+chess.js Validation
+      │
+      ▼
+Generate FEN
+      │
+      ▼
+Stockfish Worker
+      │
+      ▼
+Best Move
+      │
+      ▼
+Board Update
+      │
+      ▼
+Game Finished?
+      │
+      ├── No → Continue
+      │
+      └── Yes
+             │
+             ▼
+      Update Statistics
+             │
+             ▼
+      Save Game History
+```
+
+---
+
+# Development Roadmap
+
+## Phase 1 - Setup
+
+Tasks:
 
 * Create Angular project
-* Push repository to GitHub
+* Configure routing
+* Configure GitHub repository
 * Configure Netlify deployment
-* Setup routing
-* Create project structure
 
-### Deliverables
+Deliverable:
 
-* Angular application running
-* GitHub repository created
-* Netlify deployment successful
+* Angular application deployed
 
 ---
 
 ## Phase 2 - Chess Board
 
-### Tasks
+Tasks:
 
-* Integrate chess.js
+* Install chess.js
 * Add chess board UI
-* Allow legal moves
-* Detect game over conditions
+* Implement legal moves
 
-### Deliverables
+Deliverable:
 
-* Playable local chess game
+* Local chess game
 
 ---
 
-## Phase 3 - AI Integration
+## Phase 3 - AI Opponent
 
-### Tasks
+Tasks:
 
-* Integrate Stockfish.js
-* Create Web Worker
-* Implement difficulty levels
-* Connect AI to board
+* Integrate Stockfish
+* Configure Web Worker
+* Add difficulty levels
 
-### Deliverables
+Deliverable:
 
 * Human vs AI gameplay
 
 ---
 
-## Phase 4 - Player Tracking
+## Phase 4 - Statistics
 
-### Tasks
+Tasks:
 
-* Generate playerId
-* Save player information
-* Store game results
-* Create statistics page
+* Create StorageService
+* Track wins/losses
+* Track streaks
 
-### Deliverables
+Deliverable:
 
 * Persistent player statistics
 
 ---
 
-## Phase 5 - UI Improvements
+## Phase 5 - Game History
 
-### Tasks
+Tasks:
 
-* Responsive layout
-* Animations
-* Loading indicators
-* Theme improvements
+* Save PGN
+* Save completed games
+* Build history page
 
-### Deliverables
+Deliverable:
 
-* Production-ready UI
+* Previous game tracking
 
 ---
 
-# Future Enhancements
+## Phase 6 - Polish
 
-## Version 2
+Tasks:
 
-* Daily chess puzzles
-* Save and resume games
-* Opening explorer
-* AI hints
+* Mobile responsiveness
+* Loading indicators
+* Animations
+* Error handling
 
-## Version 3
+Deliverable:
 
-* Multiplayer support
-* Leaderboards
-* User accounts
-* Tournament mode
+* Production-ready release
 
 ---
 
 # MVP Success Criteria
 
-The project is considered complete when:
+The MVP is complete when:
 
-* User can play against AI.
-* Five difficulty levels work correctly.
-* No login is required.
-* Player statistics are stored.
-* Game history is saved.
-* Application is deployed on Netlify.
-* Source code is available on GitHub.
+* Chess board functions correctly
+* AI opponent is working
+* Five difficulty levels are available
+* Statistics are stored locally
+* Game history is stored locally
+* Application is mobile responsive
+* Application is deployed on Netlify
+* Source code is available on GitHub
+* No login is required
+* No backend is required
